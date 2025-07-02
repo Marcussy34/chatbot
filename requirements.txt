@@ -1,0 +1,33 @@
+# Core LangChain dependencies for Phase 1
+langchain==0.1.0
+langchain-community==0.0.10
+langchain-core==0.1.7
+langchain-openai==0.0.2
+
+# Memory and conversation management
+langchain-experimental==0.0.40
+
+# For later phases (FastAPI, testing, etc.)
+fastapi==0.104.1
+uvicorn==0.24.0
+pydantic==2.5.0
+httpx==0.25.2
+
+# Vector store and embeddings (for Phase 4)
+faiss-cpu==1.7.4
+sentence-transformers==2.2.2
+
+# Database support (for Phase 4)
+sqlalchemy==2.0.23
+sqlite3
+
+# Testing framework
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# Environment management
+python-dotenv==1.0.0
+
+# For web scraping (Phase 4)
+beautifulsoup4==4.12.2
+requests==2.31.0 

@@ -269,16 +269,25 @@ curl http://localhost:8000/calculator?expr=4*5
 
 ---
 
-## 📬 Submission Info
+## Project Directory
 
-- **GitHub Repo**: [https://github.com/yourusername/mindhive-chatbot](https://github.com/yourusername/mindhive-chatbot)
-- **Demo URL**: https://your-demo-url.com
-- **Submitted To**:
-  - jermaine@mindhive.asia
-  - cc: johnson@mindhive.asia
-
----
-
-## 🙌 Thanks
-
-Thanks to the Mindhive team for the opportunity! This project demonstrates backend reasoning, tool use, and retrieval-based AI.
+chatbot/
+├── app/
+│   ├── main.py             # FastAPI app
+│   ├── calculator.py       # Calculator logic
+│   ├── products.py         # RAG logic
+│   ├── outlets.py          # Text2SQL logic
+│   ├── ingestion.py        # FAISS setup
+│   ├── db.sqlite           # SQLite DB
+├── chatbot/
+│   ├── memory_bot.py       # LangChain with memory
+│   ├── planner.py          # Agentic planner
+│   ├── tools.py            # Tool wrappers
+├── tests/
+│   ├── test_memory.py
+│   ├── test_calculator.py
+│   ├── test_rag.py
+│   ├── test_outlets.py
+│   ├── test_unhappy.py
+├── README.md
+├── requirements.txt
