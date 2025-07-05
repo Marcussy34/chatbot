@@ -1,32 +1,32 @@
-# Core LangChain dependencies for Phase 1
-langchain==0.1.0
-langchain-community==0.0.10
-langchain-core==0.1.7
-langchain-openai==0.0.2
+# Core LangChain dependencies - Updated for compatibility
+langchain>=0.2.0,<0.4
+langchain-community>=0.2.0,<0.4
+langchain-core>=0.2.0,<0.4
+langchain-openai>=0.1.0,<0.3
 
 # Memory and conversation management
-langchain-experimental==0.0.40
+langchain-experimental>=0.0.50,<0.4
 
 # For later phases (FastAPI, testing, etc.)
-fastapi==0.104.1
-uvicorn==0.24.0
-pydantic==2.5.0
-httpx==0.25.2
+fastapi>=0.104.1,<0.115
+uvicorn>=0.24.0,<0.35
+pydantic>=2.5.0,<3.0
+httpx>=0.25.2,<0.30
 
 # Vector store and embeddings (for Phase 4)
-faiss-cpu==1.7.4
-sentence-transformers==2.2.2
+faiss-cpu>=1.7.4,<1.9
+sentence-transformers>=2.2.2,<3.0
 
 # Database support (for Phase 4)
-sqlalchemy==2.0.23
+sqlalchemy>=2.0.23,<2.1
 
 # Testing framework
-pytest==7.4.3
-pytest-asyncio==0.21.1
+pytest>=7.4.3,<8.0
+pytest-asyncio>=0.21.1,<0.25
 
 # Environment management
-python-dotenv==1.0.0
+python-dotenv>=1.0.0,<2.0
 
 # For web scraping (Phase 4)
-beautifulsoup4==4.12.2
-requests==2.31.0 
+beautifulsoup4>=4.12.2,<5.0
+requests>=2.31.0,<3.0 
