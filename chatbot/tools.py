@@ -28,6 +28,16 @@ class CalculatorInput(BaseModel):
     expression: str = Field(description="Mathematical expression to evaluate (e.g., '2+3', '10*5')")
 
 
+class ProductSearchInput(BaseModel):
+    """Input schema for product search tool."""
+    query: str = Field(description="Search query for drinkware products (e.g., 'black tumbler', 'ceramic mug')")
+
+
+class OutletQueryInput(BaseModel):
+    """Input schema for outlet query tool."""
+    query: str = Field(description="Natural language query about outlets (e.g., 'outlets in SS2', 'opening hours KLCC')")
+
+
 class CalculatorTool(BaseTool):
     """
     LangChain tool for calculator API integration.
@@ -155,6 +165,176 @@ class CalculatorTool(BaseTool):
             return f"Unexpected error while calculating {expression}: {str(e)}"
 
 
+class ProductSearchTool(BaseTool):
+    """
+    LangChain tool for product search using RAG.
+    
+    This tool provides semantic search over ZUS Coffee drinkware products
+    with AI-generated summaries.
+    """
+    
+    name: str = "product_search"
+    description: str = """
+    Search for ZUS Coffee drinkware products using natural language.
+    Returns AI-generated summaries of relevant products with details.
+    Examples: 'black tumbler', 'ceramic mug for office', 'travel bottle'
+    """
+    args_schema: type = ProductSearchInput
+    return_direct: bool = False
+    
+    # Custom fields for this tool
+    base_url: str = "http://localhost:8000"
+    timeout: float = 10.0
+    client: Optional[httpx.Client] = None
+    
+    def __init__(self, base_url: str = "http://localhost:8000", timeout: float = 10.0, **kwargs):
+        """
+        Initialize product search tool.
+        
+        Args:
+            base_url: Base URL of the FastAPI service
+            timeout: Request timeout in seconds
+        """
+        super().__init__(base_url=base_url, timeout=timeout, **kwargs)
+        object.__setattr__(self, 'client', httpx.Client(timeout=self.timeout))
+    
+    def _run(self, query: str) -> str:
+        """
+        Execute product search tool synchronously.
+        
+        Args:
+            query: Search query for products
+            
+        Returns:
+            String containing the search results summary
+        """
+        try:
+            logger.info(f"Product search tool called with query: '{query}'")
+            
+            # Make API request
+            base_url = self.base_url.rstrip('/')
+            response = self.client.get(
+                f"{base_url}/products",
+                params={"query": query}
+            )
+            
+            # Handle response
+            if response.status_code == 200:
+                data = response.json()
+                summary = data.get("summary", "No summary available")
+                logger.info(f"Product search successful: {data.get('total_found', 0)} products found")
+                return summary
+            
+            else:
+                # Handle API errors gracefully
+                error_data = response.json() if response.headers.get("content-type", "").startswith("application/json") else {}
+                error_msg = error_data.get("error", f"HTTP {response.status_code}")
+                logger.warning(f"Product search API error: {error_msg}")
+                return f"Error searching for products '{query}': {error_msg}"
+        
+        except httpx.ConnectError:
+            logger.error("Product search API connection failed")
+            return f"Product search service is currently unavailable. Cannot search for: {query}"
+        
+        except httpx.TimeoutException:
+            logger.error("Product search API timeout")
+            return f"Product search service timed out. Cannot search for: {query}"
+        
+        except Exception as e:
+            logger.error(f"Unexpected error in product search tool: {e}")
+            return f"Unexpected error while searching for products '{query}': {str(e)}"
+    
+    async def _arun(self, query: str) -> str:
+        """Execute product search tool asynchronously."""
+        # For simplicity, use sync version
+        return self._run(query)
+
+
+class OutletQueryTool(BaseTool):
+    """
+    LangChain tool for outlet queries using Text2SQL.
+    
+    This tool translates natural language queries to SQL and returns
+    formatted outlet information.
+    """
+    
+    name: str = "outlet_query"
+    description: str = """
+    Query ZUS Coffee outlet information using natural language.
+    Returns formatted outlet details including location, hours, and contact info.
+    Examples: 'outlets in Petaling Jaya', 'opening hours SS2', 'phone number KLCC'
+    """
+    args_schema: type = OutletQueryInput
+    return_direct: bool = False
+    
+    # Custom fields for this tool
+    base_url: str = "http://localhost:8000"
+    timeout: float = 10.0
+    client: Optional[httpx.Client] = None
+    
+    def __init__(self, base_url: str = "http://localhost:8000", timeout: float = 10.0, **kwargs):
+        """
+        Initialize outlet query tool.
+        
+        Args:
+            base_url: Base URL of the FastAPI service
+            timeout: Request timeout in seconds
+        """
+        super().__init__(base_url=base_url, timeout=timeout, **kwargs)
+        object.__setattr__(self, 'client', httpx.Client(timeout=self.timeout))
+    
+    def _run(self, query: str) -> str:
+        """
+        Execute outlet query tool synchronously.
+        
+        Args:
+            query: Natural language query about outlets
+            
+        Returns:
+            String containing the formatted outlet information
+        """
+        try:
+            logger.info(f"Outlet query tool called with query: '{query}'")
+            
+            # Make API request
+            base_url = self.base_url.rstrip('/')
+            response = self.client.get(
+                f"{base_url}/outlets",
+                params={"query": query}
+            )
+            
+            # Handle response
+            if response.status_code == 200:
+                data = response.json()
+                formatted_response = data.get("formatted_response", "No information available")
+                logger.info(f"Outlet query successful: {data.get('total_results', 0)} outlets found")
+                return formatted_response
+            
+            else:
+                # Handle API errors gracefully
+                error_data = response.json() if response.headers.get("content-type", "").startswith("application/json") else {}
+                error_msg = error_data.get("error", f"HTTP {response.status_code}")
+                logger.warning(f"Outlet query API error: {error_msg}")
+                return f"Error querying outlets '{query}': {error_msg}"
+        
+        except httpx.ConnectError:
+            logger.error("Outlet query API connection failed")
+            return f"Outlet query service is currently unavailable. Cannot process: {query}"
+        
+        except httpx.TimeoutException:
+            logger.error("Outlet query API timeout")
+            return f"Outlet query service timed out. Cannot process: {query}"
+        
+        except Exception as e:
+            logger.error(f"Unexpected error in outlet query tool: {e}")
+            return f"Unexpected error while querying outlets '{query}': {str(e)}"
+    
+    async def _arun(self, query: str) -> str:
+        """Execute outlet query tool asynchronously."""
+        # For simplicity, use sync version
+        return self._run(query)
+
+
 class ToolManager:
     """
     Manager for all available tools in the chatbot system.
@@ -163,21 +343,27 @@ class ToolManager:
     all tools available to the planner and agent.
     """
     
-    def __init__(self, calculator_base_url: str = "http://localhost:8000"):
+    def __init__(self, base_url: str = "http://localhost:8000"):
         """
         Initialize tool manager.
         
         Args:
-            calculator_base_url: Base URL for calculator API
+            base_url: Base URL for all API services
         """
-        self.calculator_base_url = calculator_base_url
+        self.base_url = base_url
         self._tools = {}
         self._initialize_tools()
     
     def _initialize_tools(self):
         """Initialize all available tools."""
         # Calculator tool
-        self._tools["calculator"] = CalculatorTool(base_url=self.calculator_base_url)
+        self._tools["calculator"] = CalculatorTool(base_url=self.base_url)
+        
+        # Product search tool (RAG)
+        self._tools["product_search"] = ProductSearchTool(base_url=self.base_url)
+        
+        # Outlet query tool (Text2SQL)
+        self._tools["outlet_query"] = OutletQueryTool(base_url=self.base_url)
         
         logger.info(f"Tool manager initialized with {len(self._tools)} tools")
     
@@ -280,17 +466,17 @@ def calculate_expression(expression: str, base_url: str = "http://localhost:8000
     return calculator.run(expression)
 
 
-def create_tool_manager(calculator_url: str = "http://localhost:8000") -> ToolManager:
+def create_tool_manager(base_url: str = "http://localhost:8000") -> ToolManager:
     """
     Create and configure a tool manager instance.
     
     Args:
-        calculator_url: Calculator API base URL
+        base_url: API base URL for all services
         
     Returns:
         Configured ToolManager instance
     """
-    return ToolManager(calculator_base_url=calculator_url)
+    return ToolManager(base_url=base_url)
 
 
 # Example usage and testing

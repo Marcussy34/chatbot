@@ -1,0 +1,47 @@
+[
+  {
+    "name": "ZUS Coffee Tumbler - Black",
+    "price": "RM 25.00",
+    "description": "Premium black tumbler with ZUS Coffee branding. Perfect for keeping your coffee hot on the go. Made from high-quality stainless steel with double-wall insulation.",
+    "link": "https://shop.zuscoffee.com/products/zus-tumbler-black",
+    "category": "Drinkware",
+    "source": "ZUS Coffee",
+    "scraped_at": "2025-07-05 20:39:02"
+  },
+  {
+    "name": "ZUS Coffee Mug - White Ceramic",
+    "price": "RM 18.00",
+    "description": "Classic white ceramic mug with ZUS Coffee logo. Perfect for office or home use. Dishwasher and microwave safe.",
+    "link": "https://shop.zuscoffee.com/products/zus-mug-white",
+    "category": "Drinkware",
+    "source": "ZUS Coffee",
+    "scraped_at": "2025-07-05 20:39:02"
+  },
+  {
+    "name": "ZUS Travel Bottle - Stainless Steel",
+    "price": "RM 35.00",
+    "description": "Large capacity travel bottle for coffee lovers. Features leak-proof design and temperature retention technology. Ideal for long commutes.",
+    "link": "https://shop.zuscoffee.com/products/zus-travel-bottle",
+    "category": "Drinkware",
+    "source": "ZUS Coffee",
+    "scraped_at": "2025-07-05 20:39:02"
+  },
+  {
+    "name": "ZUS Glass Cup Set - 2 Pieces",
+    "price": "RM 22.00",
+    "description": "Elegant glass cup set perfect for enjoying ZUS coffee at home. Heat-resistant borosilicate glass with comfortable grip design.",
+    "link": "https://shop.zuscoffee.com/products/zus-glass-cup-set",
+    "category": "Drinkware",
+    "source": "ZUS Coffee",
+    "scraped_at": "2025-07-05 20:39:02"
+  },
+  {
+    "name": "ZUS Insulated Tumbler - Rose Gold",
+    "price": "RM 28.00",
+    "description": "Stylish rose gold insulated tumbler with premium finish. Keeps beverages at optimal temperature for hours. Perfect gift for coffee enthusiasts.",
+    "link": "https://shop.zuscoffee.com/products/zus-tumbler-rose-gold",
+    "category": "Drinkware",
+    "source": "ZUS Coffee",
+    "scraped_at": "2025-07-05 20:39:02"
+  }
+]

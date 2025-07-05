@@ -1,0 +1,47 @@
+[
+  {
+    "name": "ZUS Coffee SS2",
+    "address": "G-01, Jalan SS 2/64, SS 2, 47300 Petaling Jaya, Selangor",
+    "phone": "03-7876 5432",
+    "hours": "7:00 AM - 10:00 PM",
+    "area": "Petaling Jaya",
+    "services": "Coffee, Food, Takeaway, Dine-in",
+    "scraped_at": "2025-07-05 20:44:00"
+  },
+  {
+    "name": "ZUS Coffee Damansara Uptown",
+    "address": "35, Jalan SS 21/39, Damansara Utama, 47400 Petaling Jaya, Selangor",
+    "phone": "03-7726 8901",
+    "hours": "7:30 AM - 9:30 PM",
+    "area": "Damansara",
+    "services": "Coffee, Food, Takeaway, Dine-in, WiFi",
+    "scraped_at": "2025-07-05 20:44:00"
+  },
+  {
+    "name": "ZUS Coffee KLCC",
+    "address": "LG2-09A, Suria KLCC, 50088 Kuala Lumpur",
+    "phone": "03-2382 1234",
+    "hours": "8:00 AM - 10:00 PM",
+    "area": "Kuala Lumpur",
+    "services": "Coffee, Food, Takeaway, Dine-in",
+    "scraped_at": "2025-07-05 20:44:00"
+  },
+  {
+    "name": "ZUS Coffee Sunway Pyramid",
+    "address": "LG2.144A, Sunway Pyramid, 47500 Subang Jaya, Selangor",
+    "phone": "03-7492 5678",
+    "hours": "9:00 AM - 10:00 PM",
+    "area": "Subang Jaya",
+    "services": "Coffee, Food, Takeaway, Dine-in, WiFi",
+    "scraped_at": "2025-07-05 20:44:00"
+  },
+  {
+    "name": "ZUS Coffee Mont Kiara",
+    "address": "2, Jalan Kiara 3, Mont Kiara, 50480 Kuala Lumpur",
+    "phone": "03-6201 9876",
+    "hours": "7:00 AM - 11:00 PM",
+    "area": "Mont Kiara",
+    "services": "Coffee, Food, Takeaway, Dine-in, WiFi, Parking",
+    "scraped_at": "2025-07-05 20:44:00"
+  }
+]

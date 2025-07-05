@@ -89,7 +89,9 @@ class IntentClassifier:
             r'where.*is|where.*can.*find',
             r'opening.*time|hours|when.*open|when.*close',
             r'address|direction|how.*get.*there',
-            r'petaling\s+jaya|pj|ss2|damansara|kl|kuala\s+lumpur'
+            r'petaling\s+jaya|pj|ss2|damansara|kl|kuala\s+lumpur',
+            r'outlets?\s+in',
+            r'ss2|klcc|mont\s+kiara|subang'
         ]
         
         # Greeting and conversation end patterns
@@ -260,14 +262,11 @@ class InformationExtractor:
         missing = []
         
         if intent == "outlet_query":
-            if not extracted_info.get('location') and not extracted_info.get('area'):
-                if 'outlet' in conversation_history.lower():
-                    missing.append("specific_location")
-                else:
-                    missing.append("location")
-            
-            if not extracted_info.get('query_type'):
-                missing.append("query_type")
+            # For Text2SQL, we can handle any natural language query
+            # Only require missing info if the query is too vague
+            text = extracted_info.get('text', '').lower()
+            if len(text.strip()) < 3 or text in ['outlet', 'store', 'location']:
+                missing.append("location")
         
         elif intent == "product_search":
             # For product searches, we can be more flexible
@@ -375,18 +374,21 @@ class PlannerBot:
             )
         
         elif intent == "product_search":
+            query = extracted_info.get("text", "")
             return PlannerDecision(
                 action=ActionType.RAG_SEARCH,
                 reasoning="Product inquiry detected. Will search product knowledge base.",
-                parameters={"query": extracted_info.get("text", "")},
+                parameters={"query": query},
                 confidence=confidence
             )
         
         elif intent == "outlet_query":
+            # Use the full text as the query for Text2SQL
+            query = extracted_info.get("text", "")
             return PlannerDecision(
                 action=ActionType.SQL_QUERY,
                 reasoning="Outlet/location query detected. Will query outlet database.",
-                parameters={"location_info": extracted_info},
+                parameters={"location_info": {"text": query}},
                 confidence=confidence
             )
         
@@ -477,10 +479,29 @@ class PlannerBot:
                 response = f"I would calculate: {decision.parameters.get('expression', 'N/A')} (Calculator tool will be integrated in Phase 3)"
         
         elif decision.action == ActionType.RAG_SEARCH:
-            response = f"I would search for: '{decision.parameters.get('query', 'N/A')}' (RAG search will be integrated in Phase 4)"
+            if self.enable_tools and self.tool_manager:
+                # Execute product search tool
+                query = decision.parameters.get('query', '')
+                try:
+                    tool_result = self.tool_manager.execute_tool('product_search', query=query)
+                    response = tool_result
+                except Exception as e:
+                    response = f"Product search error: {str(e)}"
+            else:
+                response = f"I would search for: '{decision.parameters.get('query', 'N/A')}' (Product search tool not available)"
         
         elif decision.action == ActionType.SQL_QUERY:
-            response = f"I would query outlet database for: {decision.parameters.get('location_info', {})} (SQL query will be integrated in Phase 4)"
+            if self.enable_tools and self.tool_manager:
+                # Execute outlet query tool
+                location_info = decision.parameters.get('location_info', {})
+                query = location_info.get('text', '') or str(location_info)
+                try:
+                    tool_result = self.tool_manager.execute_tool('outlet_query', query=query)
+                    response = tool_result
+                except Exception as e:
+                    response = f"Outlet query error: {str(e)}"
+            else:
+                response = f"I would query outlet database for: {decision.parameters.get('location_info', {})} (Outlet query tool not available)"
         
         elif decision.action == ActionType.END:
             response = "Thank you! Have a great day!"

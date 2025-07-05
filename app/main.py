@@ -18,6 +18,8 @@ from typing import Optional
 import logging
 
 from .calculator import CalculatorService
+from .rag_service import create_rag_service
+from .sql_service import create_sql_service
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -43,6 +45,8 @@ app.add_middleware(
 
 # Initialize services
 calculator_service = CalculatorService()
+rag_service = create_rag_service()
+sql_service = create_sql_service()
 
 
 @app.get("/")
@@ -55,8 +59,8 @@ async def root():
         "version": "1.0.0",
         "endpoints": {
             "calculator": "/calculator?expr=<expression>",
-            "products": "/products?query=<query> (Phase 4)",
-            "outlets": "/outlets?query=<query> (Phase 4)"
+            "products": "/products?query=<query>",
+            "outlets": "/outlets?query=<query>"
         },
         "docs": "/docs"
     }
@@ -70,7 +74,12 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "chatbot-api",
-        "phase": "3-calculator"
+        "phase": "4-rag-sql",
+        "services": {
+            "calculator": "available",
+            "rag": "available" if rag_service else "unavailable",
+            "sql": "available" if sql_service else "unavailable"
+        }
     }
 
 
@@ -119,6 +128,88 @@ async def calculate(
         raise HTTPException(
             status_code=500,
             detail="Internal server error during calculation"
+        )
+
+
+@app.get("/products")
+async def search_products(
+    query: str = Query(..., description="Search query for drinkware products", example="black tumbler")
+):
+    """
+    Search drinkware products using RAG (Retrieval-Augmented Generation).
+    
+    Args:
+        query: Natural language search query
+        
+    Returns:
+        JSON with AI-generated summary and relevant products
+        
+    Examples:
+        - /products?query=black tumbler
+        - /products?query=ceramic mug for office
+        - /products?query=travel bottle with insulation
+    """
+    try:
+        logger.info(f"Product search request: query='{query}'")
+        
+        # Get product recommendations using RAG
+        result = rag_service.get_product_recommendations(query)
+        
+        logger.info(f"Product search result: {result['total_found']} products found")
+        return result
+        
+    except Exception as e:
+        logger.error(f"Product search error: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error during product search"
+        )
+
+
+@app.get("/outlets")
+async def query_outlets(
+    query: str = Query(..., description="Natural language query for outlet information", example="outlets in SS2")
+):
+    """
+    Query outlet information using Text2SQL.
+    
+    Args:
+        query: Natural language query about outlets
+        
+    Returns:
+        JSON with formatted outlet information
+        
+    Examples:
+        - /outlets?query=outlets in Petaling Jaya
+        - /outlets?query=opening hours SS2
+        - /outlets?query=phone number KLCC
+        - /outlets?query=all outlets
+    """
+    try:
+        logger.info(f"Outlet query request: query='{query}'")
+        
+        # Process query using Text2SQL
+        result = sql_service.query_outlets(query)
+        
+        # Format for user-friendly response
+        formatted_response = sql_service.format_results_for_user(result)
+        
+        # Return both formatted and raw data
+        response = {
+            "query": query,
+            "formatted_response": formatted_response,
+            "raw_data": result,
+            "total_results": result.get('total_results', 0)
+        }
+        
+        logger.info(f"Outlet query result: {result.get('total_results', 0)} outlets found")
+        return response
+        
+    except Exception as e:
+        logger.error(f"Outlet query error: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail="Internal server error during outlet query"
         )
 
 
