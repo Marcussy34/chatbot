@@ -100,7 +100,7 @@ Fill in the following settings:
 | **Branch** | `main` |
 | **Runtime** | `Python 3` |
 | **Build Command** | `pip install -r requirements.txt` |
-| **Start Command** | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
+| **Start Command** | `python run.py` |
 
 ### Step 4: Choose Instance Type
 
