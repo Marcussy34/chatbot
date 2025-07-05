@@ -18,6 +18,7 @@ import re
 from dataclasses import dataclass
 
 from .memory_bot import MemoryBot
+from .tools import ToolManager
 
 
 class ActionType(Enum):
@@ -291,11 +292,15 @@ class PlannerBot:
     capabilities to decide the next best action in a conversation.
     """
     
-    def __init__(self):
+    def __init__(self, enable_tools: bool = True):
         """Initialize the planner bot with memory and classification components."""
         self.memory_bot = MemoryBot()
         self.intent_classifier = IntentClassifier()
         self.info_extractor = InformationExtractor()
+        
+        # Initialize tool manager for Phase 3+
+        self.enable_tools = enable_tools
+        self.tool_manager = ToolManager() if enable_tools else None
         
         print("🧠 Planner Bot initialized!")
         print("🎯 I can analyze intent and plan next actions:")
@@ -303,7 +308,11 @@ class PlannerBot:
         print("   • CALCULATE mathematical expressions") 
         print("   • SEARCH product information")
         print("   • QUERY outlet data")
-        print("   • END completed conversations\n")
+        print("   • END completed conversations")
+        
+        if enable_tools:
+            print("🔧 Tool integration enabled!")
+        print()
     
     def plan_next_action(self, user_input: str) -> PlannerDecision:
         """
@@ -451,17 +460,31 @@ class PlannerBot:
         # Plan the next action
         decision = self.plan_next_action(user_input)
         
-        # For now, simulate action execution (actual execution in Phase 3+)
+        # Execute actions based on decision
         if decision.action == ActionType.ASK:
             response = decision.parameters.get("message", "How can I help you?")
+        
         elif decision.action == ActionType.CALCULATE:
-            response = f"I would calculate: {decision.parameters.get('expression', 'N/A')} (Calculator tool will be integrated in Phase 3)"
+            if self.enable_tools and self.tool_manager:
+                # Execute calculator tool
+                expression = decision.parameters.get('expression', '')
+                try:
+                    tool_result = self.tool_manager.execute_tool('calculator', expression=expression)
+                    response = tool_result
+                except Exception as e:
+                    response = f"Calculator error: {str(e)}"
+            else:
+                response = f"I would calculate: {decision.parameters.get('expression', 'N/A')} (Calculator tool will be integrated in Phase 3)"
+        
         elif decision.action == ActionType.RAG_SEARCH:
             response = f"I would search for: '{decision.parameters.get('query', 'N/A')}' (RAG search will be integrated in Phase 4)"
+        
         elif decision.action == ActionType.SQL_QUERY:
             response = f"I would query outlet database for: {decision.parameters.get('location_info', {})} (SQL query will be integrated in Phase 4)"
+        
         elif decision.action == ActionType.END:
             response = "Thank you! Have a great day!"
+        
         else:
             response = "I'm not sure how to help with that. Could you please clarify?"
         

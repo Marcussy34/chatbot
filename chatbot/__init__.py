@@ -13,6 +13,7 @@ Modules:
 
 from .memory_bot import MemoryBot, SimpleLLM
 from .planner import PlannerBot, ActionType, PlannerDecision, IntentClassifier
+from .tools import ToolManager, CalculatorTool, calculate_expression
 
 __version__ = "1.0.0"
 __author__ = "Mindhive Assessment Candidate"
@@ -24,5 +25,8 @@ __all__ = [
     "PlannerBot", 
     "ActionType",
     "PlannerDecision",
-    "IntentClassifier"
+    "IntentClassifier",
+    "ToolManager",
+    "CalculatorTool",
+    "calculate_expression"
 ] 
