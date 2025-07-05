@@ -13,8 +13,9 @@ uvicorn>=0.24.0,<0.35
 pydantic>=2.5.0,<3.0
 httpx>=0.25.2,<0.30
 
-# Vector store and embeddings (for Phase 4)
-faiss-cpu>=1.7.4,<1.9
+# Vector store and embeddings (for Phase 4) 
+# Use latest FAISS with Python 3.13 support and pre-built wheels
+faiss-cpu>=1.11.0,<1.12
 sentence-transformers>=2.2.2,<3.0
 
 # Database support (for Phase 4)
