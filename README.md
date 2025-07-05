@@ -19,6 +19,13 @@ The system consists of:
 
 ---
 
+## 🚀 Live Demo
+
+**Deployed URL**: `https://your-app-name.onrender.com`  
+**API Documentation**: `https://your-app-name.onrender.com/docs`
+
+---
+
 ## ✅ Setup Instructions
 
 ### 1. Clone the repo
@@ -52,6 +59,10 @@ uvicorn app.main:app --reload
 ```bash
 python chatbot/memory_bot.py
 ```
+
+### 6. Deploy to Render (Optional)
+
+See **[DEPLOYMENT.md](DEPLOYMENT.md)** for complete deployment guide to Render cloud platform.
 
 ---
 

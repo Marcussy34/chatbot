@@ -19,7 +19,6 @@ sentence-transformers==2.2.2
 
 # Database support (for Phase 4)
 sqlalchemy==2.0.23
-sqlite3
 
 # Testing framework
 pytest==7.4.3
