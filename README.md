@@ -9,6 +9,16 @@ A production-ready conversational AI chatbot implementing all 5 parts of the Min
 **Production URL**: https://mindhive-chatbot-yvsu2loedq-uc.a.run.app  
 **API Documentation**: https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/docs
 
+## **🧪 What Can Be Tested Where**
+
+| Assessment Part | Local Testing | Live API | How to Test |
+|----------------|---------------|----------|-------------|
+| **Part 1**: Sequential Conversation | ✅ Required | ❌ N/A | `python chatbot/memory_bot.py` |
+| **Part 2**: Agentic Planning | ✅ Required | ❌ N/A | See [instructions below](#testing-parts-1--2-interactively) |
+| **Part 3**: Calculator | ✅ Available | ✅ Available | [Live Demo](https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/calculator?expr=2%2B3*4) |
+| **Part 4**: RAG Products | ✅ Available | ✅ Available | [Live Demo](https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/products?query=ceramic+mug) |
+| **Part 5**: Text2SQL Outlets | ✅ Available | ✅ Available | [Live Demo](https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/outlets?query=outlets+in+Petaling+Jaya) |
+
 ## 🚀 **Quick Test**
 
 Try these working examples:
@@ -233,6 +243,8 @@ GET /outlets?query=outlets in Petaling Jaya
    ```
 
 ### **Testing Parts 1 & 2 Interactively**
+
+> **⚠️ Note**: Parts 1 & 2 require local setup for testing. The live deployment at https://mindhive-chatbot-yvsu2loedq-uc.a.run.app only exposes individual tool endpoints (Parts 3-5).
 
 #### **🧪 Test Part 1: Sequential Conversation (Memory)**
 
