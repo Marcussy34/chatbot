@@ -1,0 +1,65 @@
+# Cloud Build configuration for Mindhive Chatbot
+# Automatically build and deploy to Cloud Run on git push
+
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: 
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/mindhive-chatbot:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/mindhive-chatbot:latest'
+      - '.'
+    id: 'build-image'
+
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/mindhive-chatbot:$COMMIT_SHA'
+    id: 'push-image'
+    waitFor: ['build-image']
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'mindhive-chatbot'
+      - '--image=gcr.io/$PROJECT_ID/mindhive-chatbot:$COMMIT_SHA'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--memory=1Gi'
+      - '--cpu=1'
+      - '--timeout=300s'
+      - '--max-instances=10'
+      - '--min-instances=0'
+      - '--set-env-vars=PYTHONPATH=/app'
+      - '--port=8080'
+    id: 'deploy-cloud-run'
+    waitFor: ['push-image']
+
+# Configuration
+options:
+  machineType: 'E2_HIGHCPU_8'  # Faster builds
+  substitution_option: 'ALLOW_LOOSE'
+  logging: CLOUD_LOGGING_ONLY
+
+# Build timeout
+timeout: '1200s'  # 20 minutes
+
+# Substitutions (can be overridden)
+substitutions:
+  _SERVICE_NAME: 'mindhive-chatbot'
+  _REGION: 'us-central1'
+  _MEMORY: '1Gi'
+  _CPU: '1'
+
+# Artifacts to save
+artifacts:
+  images:
+    - 'gcr.io/$PROJECT_ID/mindhive-chatbot:$COMMIT_SHA'
+    - 'gcr.io/$PROJECT_ID/mindhive-chatbot:latest' 

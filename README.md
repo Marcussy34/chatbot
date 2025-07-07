@@ -55,6 +55,32 @@ python chatbot/memory_bot.py
 
 ---
 
+## 🚀 **Deployment to Google Cloud Run**
+
+The application is production-ready and can be deployed to Google Cloud Run:
+
+### **Quick Deployment**
+```bash
+# 1. Edit deploy.sh and set your PROJECT_ID
+nano deploy.sh
+# Set: PROJECT_ID="your-google-cloud-project-id"
+
+# 2. Deploy
+./deploy.sh
+```
+
+### **Manual Steps**
+See detailed instructions in [`DEPLOYMENT.md`](DEPLOYMENT.md)
+
+### **Features**
+- ✅ **Container-ready**: Multi-stage Docker build
+- ✅ **Auto-scaling**: 0-10 instances based on load
+- ✅ **Cost-effective**: Pay only when used
+- ✅ **Production-grade**: Health checks, monitoring, security
+- ✅ **CI/CD ready**: Cloud Build integration
+
+---
+
 ## 📂 Project Structure
 
 ```
@@ -260,34 +286,61 @@ Handle:
 
 ## 🌐 Hosted Demo
 
-🟢 Optional: [https://your-demo-url.com](https://your-demo-url.com)
+🟢 **Production Deployment**: Ready for Google Cloud Run deployment
 
-Use curl/Postman to test:
+Use the deployment guide in `DEPLOYMENT.md` to deploy to Cloud Run:
+
+```bash
+# Quick deployment
+./deploy.sh
+
+# Local testing with Docker
+./deploy.sh test-local
+```
+
+API Testing:
 ```bash
 curl http://localhost:8000/calculator?expr=4*5
+curl "http://localhost:8000/products?query=black+tumbler"  
+curl "http://localhost:8000/outlets?query=outlets+in+PJ"
 ```
 
 ---
 
-## Project Directory
+## 📦 Project Directory
 
+```
 chatbot/
-├── app/
-│   ├── main.py             # FastAPI app
-│   ├── calculator.py       # Calculator logic
-│   ├── products.py         # RAG logic
-│   ├── outlets.py          # Text2SQL logic
-│   ├── ingestion.py        # FAISS setup
-│   ├── db.sqlite           # SQLite DB
-├── chatbot/
-│   ├── memory_bot.py       # LangChain with memory
-│   ├── planner.py          # Agentic planner
-│   ├── tools.py            # Tool wrappers
-├── tests/
-│   ├── test_memory.py
-│   ├── test_calculator.py
-│   ├── test_rag.py
-│   ├── test_outlets.py
-│   ├── test_unhappy.py
-├── README.md
-├── requirements.txt
+├── app/                    # FastAPI application
+│   ├── main.py             # FastAPI app entry point
+│   ├── calculator.py       # Calculator service
+│   ├── rag_service.py      # RAG product search
+│   ├── sql_service.py      # Text2SQL outlet queries
+│   └── __init__.py
+├── chatbot/                # LangChain agent logic
+│   ├── memory_bot.py       # Multi-turn conversation bot
+│   ├── planner.py          # Agentic planner/controller
+│   ├── tools.py            # Tool wrappers for LangChain
+│   └── __init__.py
+├── data/                   # Application data
+│   ├── product_index.faiss # FAISS vector index
+│   ├── zus_outlets.db      # SQLite outlet database
+│   ├── zus_outlets.json    # Outlet data (JSON)
+│   └── zus_products.json   # Product data (JSON)
+├── scripts/                # Data ingestion scripts
+│   ├── scrape_outlets.py   # Outlet data scraper
+│   └── scrape_products.py  # Product data scraper
+├── tests/                  # Test suite
+│   ├── test_memory.py      # Memory/state tests
+│   ├── test_calculator.py  # Calculator tests
+│   ├── test_planner.py     # Planner tests
+│   └── test_phase5_unhappy_flows.py  # Error handling
+├── demo_phase*.py          # Phase demonstration scripts
+├── requirements.txt        # Python dependencies
+├── Dockerfile              # Container image definition
+├── docker-compose.yml      # Local container testing
+├── deploy.sh               # Cloud Run deployment script
+├── cloudbuild.yaml         # Google Cloud Build config
+├── DEPLOYMENT.md           # Deployment documentation
+└── README.md               # This file
+```
