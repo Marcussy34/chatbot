@@ -1,6 +1,8 @@
 # Mindhive AI Chatbot Engineer Assessment
 
-A production-ready conversational AI chatbot implementing all 5 phases of the Mindhive assessment with advanced RAG, Text2SQL, and tool orchestration capabilities.
+**Technical Assessment Submission for Mindhive's AI Chatbot Engineer Role**
+
+A production-ready conversational AI chatbot implementing all 5 parts of the Mindhive technical assessment, demonstrating multi-turn conversations, agentic planning, tool integration, RAG pipelines, and robust error handling.
 
 ## 🌐 **Live Demo**
 
@@ -14,34 +16,150 @@ Try these working examples:
 - **Product Search**: [Find ceramic mugs](https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/products?query=ceramic+mug)
 - **Outlet Query**: [Outlets in PJ](https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/outlets?query=outlets+in+Petaling+Jaya)
 
-## 📋 **Implementation Overview**
+---
 
-### **✅ Phase 1: Basic Calculator**
-- Safe mathematical expression evaluation using AST parsing
-- FastAPI endpoint with comprehensive error handling
-- Security measures against code injection
+## 📋 **Assessment Implementation Overview**
 
-### **✅ Phase 2: LangChain Integration**
-- Memory-enabled conversational chatbot
-- LangChain framework with OpenAI GPT models
-- Persistent conversation history
+### **✅ Part 1: Sequential Conversation (State Management & Memory)**
 
-### **✅ Phase 3: Tool Integration**
-- Calculator tool integrated with LangChain
-- Dynamic tool selection and orchestration
-- Seamless conversation-to-calculation flow
+**Objective**: Keep track of at least three related turns with slot/variable tracking.
 
-### **✅ Phase 4: RAG Implementation**
-- **Vector Store**: FAISS with 200+ ZUS Coffee drinkware products
+**Implementation**:
+- **Framework**: LangChain with `ConversationBufferMemory`
+- **Memory Persistence**: Conversation history maintained across turns
+- **State Tracking**: Context-aware responses using previous conversation
+
+**Example Flow** (as specified in assessment):
+```
+1. User: "Is there an outlet in Petaling Jaya?"
+2. Bot: "Yes! I found 2 outlets in Petaling Jaya. Which specific location?"
+3. User: "SS2, what's the opening time?"
+4. Bot: "The ZUS Coffee SS2 outlet opens at 7:00 AM and closes at 10:00 PM daily."
+```
+
+**Files**: `chatbot/memory_bot.py`, `tests/test_memory.py`
+
+### **✅ Part 2: Agentic Planning (Planner/Controller Logic)**
+
+**Objective**: Show how the bot decides its next action (ask, call tool, or finish).
+
+**Implementation**:
+- **Intent Parsing**: Analyzes user input to determine intent
+- **Action Selection**: Chooses between ASK, CALCULATE, RAG_SEARCH, SQL_QUERY, or END
+- **Missing Information Detection**: Identifies incomplete requests and asks follow-ups
+- **Confidence Scoring**: Uses confidence levels to make decisions
+
+**Decision Flow**:
+1. Parse user intent and extract entities
+2. Identify missing information for complete action
+3. Choose appropriate action based on intent and completeness
+4. Execute action and return structured response
+
+**Files**: `chatbot/planner.py`, `tests/test_planner.py`
+
+### **✅ Part 3: Tool Calling (Calculator API Integration)**
+
+**Objective**: Integrate Calculator Tool for arithmetic with error handling.
+
+**Implementation**:
+- **Safe Evaluation**: AST-based expression parsing prevents code injection
+- **Tool Integration**: LangChain Tool wrapper for seamless integration
+- **Error Handling**: Graceful handling of malformed expressions, division by zero
+- **Security**: Input sanitization against malicious code execution
+
+**Example Transcripts**:
+```
+✅ Success: "Calculate 2+3*4" → "The result is 14"
+❌ Failure: "Calculate invalid" → "I couldn't evaluate that expression. Please provide a valid mathematical expression like '2+3' or '(10-5)*2'."
+```
+
+**Files**: `app/calculator.py`, `chatbot/tools.py`, `tests/test_calculator.py`
+
+### **✅ Part 4: Custom API & RAG Integration**
+
+**Objective**: Build FastAPI endpoints for domain data with RAG and Text2SQL.
+
+#### **4.1 Product-KB Retrieval Endpoint**
+- **Data Source**: ZUS Coffee Drinkware from https://shop.zuscoffee.com/ (Drinkware category)
+- **Vector Store**: FAISS with 200+ product embeddings
 - **Embeddings**: SentenceTransformers (all-MiniLM-L6-v2)
-- **Text2SQL**: Natural language queries to SQLite outlet database
-- **Smart Search**: Semantic product recommendations
+- **Endpoint**: `/products?query=<user_question>`
+- **Response**: AI-generated summary with top-k relevant products
 
-### **✅ Phase 5: Advanced Conversational AI**
-- **Planning & Reasoning**: Multi-step conversation handling
-- **Intent Classification**: Dynamic tool selection based on user intent
-- **Memory Integration**: Context-aware responses across turns
-- **Error Handling**: Comprehensive unhappy path management
+**Example**:
+```json
+GET /products?query=ceramic mug
+{
+  "query": "ceramic mug",
+  "products": [
+    {
+      "name": "ZUS Coffee Ceramic Mug 350ml",
+      "description": "Premium ceramic mug with ZUS branding",
+      "price": "RM 35.00",
+      "similarity_score": 0.92
+    }
+  ],
+  "total_results": 3
+}
+```
+
+#### **4.2 Outlets Text2SQL Endpoint**
+- **Data Source**: ZUS Coffee outlets from https://zuscoffee.com/category/store/kuala-lumpur-selangor/
+- **Database**: SQLite with outlet locations, hours, services
+- **Text2SQL**: LangChain-based natural language to SQL conversion
+- **Endpoint**: `/outlets?query=<nl_query>`
+- **Security**: SQL injection protection with input sanitization
+
+**Example**:
+```json
+GET /outlets?query=outlets in Petaling Jaya
+{
+  "query": "outlets in Petaling Jaya",
+  "sql_generated": "SELECT * FROM outlets WHERE area LIKE '%Petaling Jaya%'",
+  "outlets": [
+    {
+      "name": "ZUS Coffee SS2",
+      "area": "Petaling Jaya",
+      "opening_hours": "Monday - Sunday: 7:00 AM - 10:00 PM"
+    }
+  ],
+  "total_results": 2
+}
+```
+
+**Files**: `app/rag_service.py`, `app/sql_service.py`, `app/main.py`
+
+### **✅ Part 5: Unhappy Flows (Robustness & Error Handling)**
+
+**Objective**: Handle invalid/malicious inputs with graceful degradation.
+
+**Test Cases Implemented**:
+
+1. **Missing Parameters**:
+   ```
+   User: "Calculate" → Bot: "Please provide a mathematical expression to calculate, like '2+3' or '10*5'."
+   User: "Show outlets" → Bot: "I can help you find outlet information. Which area are you interested in?"
+   ```
+
+2. **API Downtime**: 
+   ```
+   Service Unavailable → Bot: "The product search service is temporarily unavailable. Please try again later."
+   ```
+
+3. **Malicious Payloads**:
+   ```
+   SQL Injection: "outlets'; DROP TABLE outlets; --" → Blocked with safe error message
+   Code Injection: "__import__('os').system('rm -rf /')" → AST parser prevents execution
+   ```
+
+**Error Handling Strategy**:
+- **Input Validation**: All user inputs sanitized before processing
+- **Safe Evaluation**: AST-based parsing for mathematical expressions
+- **SQL Injection Protection**: Parameterized queries and dangerous keyword detection
+- **Graceful Degradation**: Fallback responses when services are unavailable
+- **Clear Error Messages**: User-friendly error descriptions with recovery suggestions
+
+**Files**: `tests/test_calculator.py`, `tests/test_memory.py`, `tests/test_planner.py`
 
 ---
 
@@ -110,6 +228,8 @@ Try these working examples:
 
 2. **Deploy**
    ```bash
+   # Edit deploy.sh and set your PROJECT_ID
+   nano deploy.sh
    chmod +x deploy.sh
    ./deploy.sh
    ```
@@ -160,17 +280,17 @@ python -m pytest tests/test_planner.py -v
 - **Features**: GPT-4 integration, persistent memory, tool selection
 
 #### **3. Data Layer (`data/`)**
-- **`product_index.faiss`**: Vector embeddings for 200+ products
-- **`zus_outlets.db`**: SQLite database with outlet information
-- **`zus_products.json`**: Product catalog for vector search
+- **`product_index.faiss`**: Vector embeddings for 200+ ZUS Coffee drinkware products
+- **`zus_outlets.db`**: SQLite database with ZUS Coffee outlet information
+- **`zus_products.json`**: Product catalog scraped from shop.zuscoffee.com
 - **Features**: Efficient similarity search, structured queries
 
 ### **Data Flow**
 
 1. **User Input** → FastAPI endpoint or chatbot interface
-2. **Intent Classification** → Planner determines action type
-3. **Tool Selection** → Calculator, RAG search, or SQL query
-4. **Data Processing** → Vector similarity or SQL execution
+2. **Intent Classification** → Planner determines action type (ASK/CALCULATE/RAG_SEARCH/SQL_QUERY/END)
+3. **Tool Selection** → Calculator, RAG search, or SQL query based on intent
+4. **Data Processing** → Vector similarity search or SQL execution
 5. **Response Generation** → LangChain formats natural language response
 6. **Memory Update** → Conversation context preserved for future turns
 
@@ -181,46 +301,46 @@ python -m pytest tests/test_planner.py -v
 ### **Framework Choices**
 
 **FastAPI vs Django/Flask**
-- ✅ **Chose FastAPI**: Automatic API docs, async support, type hints
-- ❌ **Trade-off**: Less ecosystem than Django, newer framework
+- ✅ **Chose FastAPI**: Automatic API docs, async support, type hints, OpenAPI compliance
+- ❌ **Trade-off**: Less mature ecosystem than Django, newer framework
 
 **LangChain vs Custom Implementation**
-- ✅ **Chose LangChain**: Rapid development, memory management, tool integration
-- ❌ **Trade-off**: Additional dependency, potential version conflicts
+- ✅ **Chose LangChain**: Rapid development, built-in memory management, tool integration
+- ❌ **Trade-off**: Additional dependency, potential version conflicts, abstraction overhead
 
 ### **Data Storage**
 
 **FAISS vs Pinecone/Weaviate**
-- ✅ **Chose FAISS**: No external dependencies, fast local search, cost-effective
-- ❌ **Trade-off**: No cloud scaling, manual index management
+- ✅ **Chose FAISS**: No external dependencies, fast local search, cost-effective, no API limits
+- ❌ **Trade-off**: No cloud scaling, manual index management, single-machine limitation
 
 **SQLite vs PostgreSQL/MySQL**
-- ✅ **Chose SQLite**: Zero configuration, portable, perfect for demo
+- ✅ **Chose SQLite**: Zero configuration, portable, perfect for demo, embedded database
 - ❌ **Trade-off**: Limited concurrency, not suitable for high-scale production
 
 ### **Deployment**
 
 **Google Cloud Run vs Heroku/Vercel**
-- ✅ **Chose Cloud Run**: Serverless scaling, container support, pay-per-use
-- ❌ **Trade-off**: Cold starts, Google Cloud complexity
+- ✅ **Chose Cloud Run**: Serverless scaling, container support, pay-per-use, fast cold starts
+- ❌ **Trade-off**: Cold start latency, Google Cloud complexity, vendor lock-in
 
 **Multi-stage Docker vs Single Stage**
-- ✅ **Chose Multi-stage**: Smaller production image, security, optimization
+- ✅ **Chose Multi-stage**: Smaller production image, security isolation, build optimization
 - ❌ **Trade-off**: More complex build process, longer build times
 
 ### **Performance vs Complexity**
 
-**Embeddings Model**
-- ✅ **all-MiniLM-L6-v2**: Good balance of speed and accuracy
-- ❌ **Trade-off**: Not as accurate as larger models, English-only
+**Embeddings Model (all-MiniLM-L6-v2)**
+- ✅ **Benefits**: Good balance of speed and accuracy, lightweight, fast inference
+- ❌ **Trade-off**: Not as accurate as larger models, English-only, limited context
 
-**Memory Strategy**
-- ✅ **In-memory conversation buffer**: Simple, fast access
-- ❌ **Trade-off**: Lost on restart, limited scalability
+**Memory Strategy (In-memory buffer)**
+- ✅ **Benefits**: Simple implementation, fast access, no external dependencies
+- ❌ **Trade-off**: Lost on restart, limited scalability, memory consumption
 
 **Security vs Usability**
-- ✅ **AST-based expression evaluation**: Safe from code injection
-- ❌ **Trade-off**: Limited mathematical functions, complexity
+- ✅ **AST-based expression evaluation**: Safe from code injection, controlled execution
+- ❌ **Trade-off**: Limited mathematical functions, parsing complexity, reduced flexibility
 
 ---
 
@@ -228,16 +348,18 @@ python -m pytest tests/test_planner.py -v
 
 ### **Endpoints**
 
-| Method | Endpoint | Description | Example |
-|--------|----------|-------------|---------|
-| `GET` | `/health` | Service health check | `{"status": "healthy"}` |
-| `GET` | `/calculator` | Mathematical expression evaluation | `?expr=2%2B3` |
-| `GET` | `/products` | RAG product search | `?query=ceramic+mug` |
-| `GET` | `/outlets` | Text2SQL outlet queries | `?query=outlets+in+PJ` |
-| `GET` | `/docs` | Interactive API documentation | Swagger UI |
+| Method | Endpoint | Description | Parameters | Response |
+|--------|----------|-------------|------------|----------|
+| `GET` | `/health` | Service health check | None | `{"status": "healthy"}` |
+| `GET` | `/calculator` | Mathematical expression evaluation | `expr` (string) | `{"result": number}` |
+| `GET` | `/products` | RAG product search | `query` (string) | `{"products": [...]}` |
+| `GET` | `/outlets` | Text2SQL outlet queries | `query` (string) | `{"outlets": [...]}` |
+| `GET` | `/docs` | Interactive API documentation | None | Swagger UI |
 
-### **Calculator API**
-```json
+### **Example Requests & Responses**
+
+#### **Calculator API**
+```bash
 GET /calculator?expr=2%2B3*4
 
 Response:
@@ -248,8 +370,8 @@ Response:
 }
 ```
 
-### **Products API (RAG)**
-```json
+#### **Products API (RAG)**
+```bash
 GET /products?query=black+tumbler
 
 Response:
@@ -258,17 +380,19 @@ Response:
   "products": [
     {
       "name": "ZUS Coffee Black Tumbler 450ml",
-      "description": "Sleek black stainless steel tumbler...",
+      "description": "Sleek black stainless steel tumbler with premium insulation...",
       "price": "RM 45.00",
+      "category": "Drinkware",
       "similarity_score": 0.89
     }
   ],
-  "total_results": 3
+  "total_results": 3,
+  "source": "ZUS Coffee Drinkware Collection"
 }
 ```
 
-### **Outlets API (Text2SQL)**
-```json
+#### **Outlets API (Text2SQL)**
+```bash
 GET /outlets?query=outlets+in+Petaling+Jaya
 
 Response:
@@ -280,10 +404,12 @@ Response:
       "name": "ZUS Coffee SS2",
       "area": "Petaling Jaya",
       "address": "47300 Petaling Jaya, Selangor",
-      "opening_hours": "Monday - Sunday: 7:00 AM - 10:00 PM"
+      "opening_hours": "Monday - Sunday: 7:00 AM - 10:00 PM",
+      "services": "Dine-in, Takeaway, Drive-thru"
     }
   ],
-  "total_results": 2
+  "total_results": 2,
+  "formatted_response": "I found 2 outlets in Petaling Jaya..."
 }
 ```
 
@@ -292,29 +418,45 @@ Response:
 ## 🧪 **Testing Strategy**
 
 ### **Test Coverage**
-- **Unit Tests**: Core service functionality
-- **Integration Tests**: API endpoint validation
+- **Unit Tests**: Core service functionality (calculator, RAG, SQL)
+- **Integration Tests**: API endpoint validation and chatbot integration
+- **Memory Tests**: Conversation persistence across multiple turns
+- **Planning Tests**: Intent classification and action selection accuracy
 - **Security Tests**: Input validation and injection protection
-- **Memory Tests**: Conversation persistence
-- **Planning Tests**: Intent classification accuracy
+- **Error Handling Tests**: Graceful degradation scenarios
 
 ### **Test Execution**
 ```bash
 # Run all tests
 python -m pytest tests/ -v
 
-# Test results: 76+ passing tests covering all major functionality
+# Test results: 76+ passing tests covering all assessment requirements
+✅ test_calculator.py: Safe evaluation, error handling, tool integration
+✅ test_memory.py: Multi-turn conversations, state persistence
+✅ test_planner.py: Intent parsing, action selection, decision logic
 ```
 
 ---
 
-## 🔒 **Security Measures**
+## 🔒 **Security & Error Handling Strategy**
 
-- **Input Validation**: All user inputs sanitized
-- **Safe Evaluation**: AST-based expression parsing prevents code injection
-- **SQL Injection Protection**: Parameterized queries and input filtering
-- **Container Security**: Non-root user execution
-- **Dependency Management**: Regular security updates
+### **Input Validation & Security**
+- **Mathematical Expressions**: AST-based parsing prevents code injection
+- **SQL Queries**: Parameterized queries and dangerous keyword detection
+- **User Input**: Comprehensive sanitization and validation
+- **Container Security**: Non-root user execution, minimal attack surface
+
+### **Error Handling Patterns**
+- **Missing Parameters**: Clear prompts for required information
+- **Service Downtime**: Graceful fallbacks with user-friendly messages
+- **Malicious Input**: Blocked with safe error responses
+- **Validation Errors**: Helpful suggestions for correct input format
+
+### **Recovery & Robustness**
+- **Conversation Recovery**: Bot suggests alternatives when confused
+- **API Failure Handling**: Fallback responses when external services fail
+- **Memory Management**: Graceful handling of conversation context limits
+- **Rate Limiting Ready**: Infrastructure prepared for production scaling
 
 ---
 
@@ -328,41 +470,53 @@ chatbot/
 │   ├── rag_service.py     # Vector search and RAG implementation
 │   └── sql_service.py     # Text2SQL outlet queries
 ├── chatbot/               # LangChain Chatbot Implementation
-│   ├── memory_bot.py      # Conversation memory management
-│   ├── planner.py         # Intent classification and planning
-│   └── tools.py           # Tool integration and orchestration
-├── data/                  # Data Layer
-│   ├── product_index.faiss # Vector embeddings for products
+│   ├── memory_bot.py      # Conversation memory management (Part 1)
+│   ├── planner.py         # Intent classification and planning (Part 2)
+│   └── tools.py           # Tool integration and orchestration (Part 3)
+├── data/                  # Data Layer (Part 4)
+│   ├── product_index.faiss # Vector embeddings for ZUS products
 │   ├── zus_outlets.db     # SQLite outlet database
-│   └── zus_products.json  # Product catalog
-├── tests/                 # Comprehensive Test Suite
-│   ├── test_calculator.py # Calculator service tests
-│   ├── test_memory.py     # Memory and conversation tests
-│   └── test_planner.py    # Planning and intent tests
+│   └── zus_products.json  # Product catalog from shop.zuscoffee.com
+├── tests/                 # Comprehensive Test Suite (Part 5)
+│   ├── test_calculator.py # Calculator service and tool integration tests
+│   ├── test_memory.py     # Memory and conversation persistence tests
+│   └── test_planner.py    # Planning and intent classification tests
 ├── Dockerfile             # Production container configuration
 ├── deploy.sh              # Google Cloud Run deployment script
 ├── cloudbuild.yaml        # CI/CD pipeline configuration
 ├── requirements.txt       # Python dependencies
-├── README.md              # This documentation
-└── SUBMISSION.md          # Formal submission document
+├── README.md              # This comprehensive documentation
+└── SUBMISSION.md          # Formal submission summary
 ```
 
 ---
 
-## 🎯 **Submission Summary**
+## 🎯 **Mindhive Assessment Compliance**
 
-This chatbot demonstrates advanced conversational AI capabilities through:
+This implementation addresses all requirements of the Mindhive AI Chatbot Engineer technical assessment:
 
-- **✅ Complete Implementation**: All 5 phases with production deployment
-- **✅ Advanced Features**: RAG, Text2SQL, tool orchestration, memory
-- **✅ Production Ready**: Security, testing, monitoring, scalability
-- **✅ Professional Quality**: Clean code, documentation, architecture
+### **✅ State Management & Memory**: Multi-turn conversation tracking with LangChain memory
+### **✅ Planner/Controller Logic**: Intent parsing and action selection with confidence scoring
+### **✅ Tool Integration**: Calculator API with error handling and LangChain integration
+### **✅ Custom API Consumption**: FastAPI endpoints for ZUS Coffee products and outlets
+### **✅ Retrieval-Augmented Generation**: FAISS vector store + Text2SQL for domain data
+### **✅ Robustness**: Graceful degradation for missing input, downtime, and malicious payloads
 
-**Live Demo**: https://mindhive-chatbot-yvsu2loedq-uc.a.run.app  
-**GitHub Repository**: https://github.com/Marcussy34/chatbot
+**Assessment Data Sources**:
+- **Products**: ZUS Coffee Drinkware from https://shop.zuscoffee.com/ (200+ items)
+- **Outlets**: ZUS Coffee locations from https://zuscoffee.com/category/store/kuala-lumpur-selangor/
 
 ---
 
-## 📞 **Contact**
+## 📞 **Submission Details**
 
-For questions about this implementation, please contact the repository owner.
+**Live Demo**: https://mindhive-chatbot-yvsu2loedq-uc.a.run.app  
+**GitHub Repository**: https://github.com/Marcussy34/chatbot  
+**Deployment**: Google Cloud Run (production-ready, auto-scaling)  
+**Assessment Completion**: All 5 parts implemented with comprehensive testing
+
+**Delivery**: Submitted to jermaine@mindhive.asia (cc: johnson@mindhive.asia)
+
+---
+
+**Thank you for reviewing this Mindhive AI Chatbot Engineer assessment submission!** 🚀
