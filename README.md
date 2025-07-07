@@ -355,6 +355,79 @@ python -m pytest tests/test_calculator.py -v # Tool integration
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
+### **Conversation Flow Diagram**
+
+The following shows how user inputs flow through the chatbot's planning and memory system:
+
+```mermaid
+graph TD
+    A["👤 User Input"] --> B["🧠 Intent Classification<br/>(Planner Bot)"]
+    B --> C{🎯 Action Type?}
+    
+    C -->|CALCULATE| D["🔢 Calculator Service<br/>2+3*4 → 14"]
+    C -->|RAG_SEARCH| E["🔍 Product Search<br/>Vector Similarity"]
+    C -->|SQL_QUERY| F["🗃️ Text2SQL<br/>Outlet Database"]
+    C -->|ASK| G["❓ Clarification<br/>Request More Info"]
+    C -->|END| H["✅ End Conversation"]
+    
+    D --> I["💾 Memory Bot<br/>Store Context"]
+    E --> I
+    F --> I
+    G --> I
+    
+    I --> J["📝 Generate Response"]
+    J --> K["💬 Return to User"]
+    
+    K --> L{🔄 Continue?}
+    L -->|Yes| A
+    L -->|No| H
+    
+    style A fill:#e1f5fe
+    style B fill:#f3e5f5
+    style I fill:#fff3e0
+    style J fill:#e8f5e8
+```
+
+### **Deployment Architecture**
+
+```mermaid
+graph LR
+    subgraph "🌐 Google Cloud Run"
+        direction TB
+        A["🐳 Docker Container"]
+        B["📊 FastAPI Application"]
+        C["🤖 LangChain Chatbot"]
+        D["💾 Data Layer"]
+        
+        A --> B
+        B --> C
+        C --> D
+    end
+    
+    subgraph "📱 Client Applications"
+        E["🌐 Web Browser"]
+        F["📡 API Clients"]
+        G["🧪 Testing Tools"]
+    end
+    
+    subgraph "🗄️ Data Sources"
+        H["☕ ZUS Coffee Products<br/>shop.zuscoffee.com"]
+        I["📍 ZUS Outlet Locations<br/>zuscoffee.com"]
+    end
+    
+    E --> B
+    F --> B
+    G --> B
+    
+    D -.->|Scraped Data| H
+    D -.->|Scraped Data| I
+    
+    style A fill:#e3f2fd
+    style B fill:#f3e5f5
+    style C fill:#fff3e0
+    style D fill:#e8f5e8
+```
+
 ### **Component Breakdown**
 
 #### **1. FastAPI Web Server (`app/`)**
