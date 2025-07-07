@@ -1,0 +1,84 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# Environment Variables
+.env
+.env.local
+.env.production
+.env.staging
+
+# API Keys and Secrets
+*.key
+*.pem
+*secret*
+*token*
+*password*
+
+# Google Cloud
+gcloud-key.json
+service-account.json
+*.json.key
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db-journal
+*.sqlite-wal
+*.sqlite-shm
+
+# Cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Docker
+.dockerignore.bak
+
+# Local config
+config.local.*
+local_config.* 

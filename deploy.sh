@@ -6,7 +6,7 @@
 set -e  # Exit on any error
 
 # Configuration
-PROJECT_ID="sincere-amulet-465112-b9"
+PROJECT_ID="your-google-cloud-project-id"
 SERVICE_NAME="mindhive-chatbot"
 REGION="us-central1"
 IMAGE_NAME="gcr.io/$PROJECT_ID/$SERVICE_NAME"
