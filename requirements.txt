@@ -2,7 +2,7 @@
 langchain>=0.1.0
 langchain-community>=0.0.10
 langchain-core>=0.1.8
-langchain-openai>=0.0.2
+# langchain-openai>=0.0.2  # Not needed - using custom LLM
 
 # Memory and conversation management
 langchain-experimental>=0.0.40

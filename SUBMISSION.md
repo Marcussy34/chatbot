@@ -73,7 +73,7 @@ https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/outlets?query=opening+hours
 
 ### **Backend Stack**
 - **Framework**: FastAPI with async/await
-- **AI/ML**: LangChain + OpenAI GPT models
+- **AI/ML**: LangChain + Custom LLM implementation
 - **Vector Database**: FAISS for embeddings
 - **SQL Database**: SQLite for structured data
 - **Embeddings**: SentenceTransformers

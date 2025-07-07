@@ -167,7 +167,6 @@ GET /outlets?query=outlets in Petaling Jaya
 
 ### **Prerequisites**
 - Python 3.11+
-- OpenAI API Key
 - Git
 
 ### **Local Development Setup**
@@ -189,9 +188,8 @@ GET /outlets?query=outlets in Petaling Jaya
    pip install -r requirements.txt
    ```
 
-4. **Set environment variables**
+4. **Optional: Set port (defaults to 8000)**
    ```bash
-   export OPENAI_API_KEY="your-openai-api-key"
    export PORT=8000  # Optional, defaults to 8000
    ```
 
@@ -214,7 +212,7 @@ GET /outlets?query=outlets in Petaling Jaya
 
 2. **Run the container**
    ```bash
-   docker run -p 8000:8000 -e OPENAI_API_KEY="your-api-key" mindhive-chatbot
+   docker run -p 8000:8000 mindhive-chatbot
    ```
 
 ### **Cloud Deployment (Google Cloud Run)**
@@ -277,7 +275,7 @@ python -m pytest tests/test_planner.py -v
 - **`memory_bot.py`**: Conversation memory management
 - **`planner.py`**: Intent classification and action planning
 - **`tools.py`**: Tool integration and orchestration
-- **Features**: GPT-4 integration, persistent memory, tool selection
+- **Features**: Custom LLM implementation, persistent memory, tool selection
 
 #### **3. Data Layer (`data/`)**
 - **`product_index.faiss`**: Vector embeddings for 200+ ZUS Coffee drinkware products
