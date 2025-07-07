@@ -137,7 +137,7 @@ GET /outlets?query=outlets in Petaling Jaya
 }
 ```
 
-**Files**: `app/rag_service.py`, `app/sql_service.py`, `app/main.py`
+**Files**: `app/rag_service.py`, `app/sql_service.py`, `app/main.py`, `scripts/scrape_products.py`, `scripts/scrape_outlets.py`, `scripts/build_vector_index.py`
 
 ### **✅ Part 5: Unhappy Flows (Robustness & Error Handling)**
 
@@ -667,8 +667,10 @@ This implementation addresses all requirements of the Mindhive AI Chatbot Engine
 ### **✅ Robustness**: Graceful degradation for missing input, downtime, and malicious payloads
 
 **Assessment Data Sources**:
-- **Products**: ZUS Coffee Drinkware from https://shop.zuscoffee.com/ (200+ items)
-- **Outlets**: ZUS Coffee locations from https://zuscoffee.com/category/store/kuala-lumpur-selangor/
+- **Products**: ZUS Coffee Drinkware from https://shop.zuscoffee.com/ (200+ items) - scraped via `scripts/scrape_products.py`
+- **Outlets**: ZUS Coffee locations from https://zuscoffee.com/category/store/kuala-lumpur-selangor/ - scraped via `scripts/scrape_outlets.py`
+
+**Data Pipeline**: Run complete ingestion with `python scripts/run_data_pipeline.py`
 
 ---
 
