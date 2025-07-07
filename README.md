@@ -232,16 +232,97 @@ GET /outlets?query=outlets in Petaling Jaya
    ./deploy.sh
    ```
 
-### **Running Tests**
+### **Testing Parts 1 & 2 Interactively**
+
+#### **🧪 Test Part 1: Sequential Conversation (Memory)**
+
+Experience the exact conversation flow from the assessment:
+
+```bash
+# Run the interactive memory bot
+python -c "
+from chatbot.memory_bot import MemoryBot
+bot = MemoryBot()
+
+# Test the exact assessment example
+print('Testing: Is there an outlet in Petaling Jaya?')
+response1 = bot.chat('Is there an outlet in Petaling Jaya?')
+print(f'Bot: {response1}')
+
+print('\\nTesting: SS2, what\\'s the opening time?')
+response2 = bot.chat('SS2, what\\'s the opening time?')
+print(f'Bot: {response2}')
+
+print('\\n📝 Memory Contents:')
+print(bot.get_memory_contents())
+"
+```
+
+**Expected Output:**
+```
+1. Bot: "Yes! We have several outlets in Petaling Jaya. Which outlet are you referring to?"
+2. Bot: "Ah yes, the SS2 outlet opens at 9:00AM and closes at 10:00PM."
+✅ Memory preserved across turns!
+```
+
+#### **🧠 Test Part 2: Agentic Planning (Decision Making)**
+
+See how the planner decides different actions:
+
+```bash
+# Test the planner's decision making
+python -c "
+from chatbot.planner import PlannerBot
+planner = PlannerBot()
+
+# Test different input types
+inputs = [
+    'Calculate 2+3*4',           # Should choose CALCULATE
+    'Find black tumbler',        # Should choose RAG_SEARCH  
+    'outlets in SS2',           # Should choose SQL_QUERY
+    'What time does it open?'   # Should ASK for clarification
+]
+
+for user_input in inputs:
+    decision = planner.plan_next_action(user_input)
+    print(f'Input: \"{user_input}\"')
+    print(f'Action: {decision.action.value.upper()}')
+    print(f'Reasoning: {decision.reasoning}\\n')
+"
+```
+
+**Expected Output:**
+```
+Input: "Calculate 2+3*4"      → Action: CALCULATE
+Input: "Find black tumbler"   → Action: RAG_SEARCH
+Input: "outlets in SS2"       → Action: SQL_QUERY  
+Input: "What time...?"        → Action: ASK
+```
+
+#### **🎮 Interactive Demo Mode**
+
+For a full interactive experience:
+
+```bash
+# Run the memory bot interactively
+python chatbot/memory_bot.py
+
+# Try this conversation:
+# 1. "Is there an outlet in Petaling Jaya?"
+# 2. "SS2, what's the opening time?"
+# 3. "What services do you offer?"
+```
+
+### **Running Automated Tests**
 
 ```bash
 # Run all tests
 python -m pytest tests/ -v
 
-# Run specific test categories
-python -m pytest tests/test_calculator.py -v
-python -m pytest tests/test_memory.py -v
-python -m pytest tests/test_planner.py -v
+# Test specific parts
+python -m pytest tests/test_memory.py -v    # Part 1 tests
+python -m pytest tests/test_planner.py -v   # Part 2 tests
+python -m pytest tests/test_calculator.py -v # Tool integration
 ```
 
 ---
