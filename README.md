@@ -4,10 +4,35 @@
 
 A production-ready conversational AI chatbot implementing all 5 parts of the Mindhive technical assessment, demonstrating multi-turn conversations, agentic planning, tool integration, RAG pipelines, and robust error handling.
 
-## 🌐 **Live Demo**
+---
 
+## 📋 **Submission Checklist - All Requirements Met**
+
+### ✅ **GitHub Repo (Public Link - No Secrets)**
+**Repository**: https://github.com/Marcussy34/chatbot
+
+### ✅ **Hosted Demo**
 **Production URL**: https://mindhive-chatbot-yvsu2loedq-uc.a.run.app  
-**API Documentation**: https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/docs
+**Live API Documentation**: https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/docs
+
+### ✅ **README.md Requirements**
+- ✅ **Setup & Run Instructions**: [Complete setup guide](#setup--run-instructions) with local, Docker, and cloud deployment
+- ✅ **Architecture Overview**: [Comprehensive system architecture](#architecture-overview) with detailed component diagrams
+- ✅ **Key Trade-offs**: [Detailed analysis](#key-trade-offs) of framework choices, data storage, and deployment decisions
+
+### ✅ **Documentation Requirements**
+- ✅ **API Specification**: [Complete API docs](#api-specification) including RAG & Text2SQL endpoints with examples
+- ✅ **Flow Diagrams**: [Interactive conversation flow](#conversation-flow-diagram) and [system architecture](#comprehensive-system-architecture) diagrams
+- ✅ **Chatbot Setup**: [Testing instructions](#testing-parts-1--2-interactively) with example conversations and screenshots
+
+## 🚀 **Quick Test - Try It Now**
+
+**Live API Endpoints** (Click to test immediately):
+- **Calculator**: [2+3*4](https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/calculator?expr=2%2B3*4) → Returns: `{"result": 14}`
+- **Product Search**: [Find ceramic mugs](https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/products?query=ceramic+mug) → RAG-powered product recommendations
+- **Outlet Query**: [Outlets in PJ](https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/outlets?query=outlets+in+Petaling+Jaya) → Text2SQL database results
+
+---
 
 ## **🧪 What Can Be Tested Where**
 
