@@ -550,26 +550,57 @@ graph LR
     style D fill:#e8f5e8
 ```
 
-### **Component Breakdown**
+### **Complete Component Breakdown**
 
 #### **1. FastAPI Web Server (`app/`)**
-- **`main.py`**: API endpoints and routing
-- **`calculator.py`**: Safe mathematical expression evaluation
-- **`rag_service.py`**: Vector search and product recommendations
-- **`sql_service.py`**: Text2SQL outlet queries
-- **Features**: Async/await, automatic API docs, input validation
+- **`__init__.py`**: Package initialization
+- **`main.py`**: API endpoints, routing, FastAPI app configuration with OpenAPI docs
+- **`calculator.py`**: AST-based mathematical expression evaluation with security
+- **`rag_service.py`**: FAISS vector search, SentenceTransformers integration, product recommendations
+- **`sql_service.py`**: Text2SQL translation, SQLite queries, outlet information retrieval
+- **Features**: Async/await, automatic OpenAPI docs, input validation, error handling
 
-#### **2. LangChain Chatbot (`chatbot/`)**
-- **`memory_bot.py`**: Conversation memory management
-- **`planner.py`**: Intent classification and action planning
-- **`tools.py`**: Tool integration and orchestration
-- **Features**: Custom LLM implementation, persistent memory, tool selection
+#### **2. LangChain Chatbot Engine (`chatbot/`)**
+- **`__init__.py`**: Package initialization
+- **`memory_bot.py`**: ConversationBufferMemory, multi-turn conversation tracking, context preservation
+- **`planner.py`**: Intent classification, action selection (ASK/CALCULATE/RAG_SEARCH/SQL_QUERY/END), decision logic
+- **`tools.py`**: LangChain tool wrappers, HTTP client integration, tool manager orchestration
+- **Features**: Custom LLM implementation, persistent memory, tool selection, confidence scoring
 
-#### **3. Data Layer (`data/`)**
-- **`product_index.faiss`**: Vector embeddings for 200+ ZUS Coffee drinkware products
-- **`zus_outlets.db`**: SQLite database with ZUS Coffee outlet information
-- **`zus_products.json`**: Product catalog scraped from shop.zuscoffee.com
-- **Features**: Efficient similarity search, structured queries
+#### **3. Data Ingestion Pipeline (`scripts/`)**
+- **`__init__.py`**: Package initialization
+- **`scrape_products.py`**: ZUS Coffee product scraper with BeautifulSoup, rate limiting, fallback data
+- **`scrape_outlets.py`**: ZUS Coffee outlet scraper, SQLite database creation, structured data extraction
+- **`build_vector_index.py`**: FAISS index builder, SentenceTransformers embeddings, vector ingestion
+- **`run_data_pipeline.py`**: Master orchestrator, complete pipeline execution, output verification
+- **Features**: Respectful scraping, error handling, professional logging, data validation
+
+#### **4. Data Storage Layer (`data/`)**
+- **`product_index.faiss`**: FAISS vector index with 200+ product embeddings for semantic search
+- **`zus_outlets.db`**: SQLite database with outlet locations, hours, services, contact information
+- **`zus_products.json`**: Raw product catalog scraped from shop.zuscoffee.com drinkware section
+- **`zus_outlets.json`**: Raw outlet data scraped from zuscoffee.com KL-Selangor locations
+- **Features**: Efficient similarity search, structured SQL queries, portable file formats
+
+#### **5. Comprehensive Test Suite (`tests/`)**
+- **`__init__.py`**: Package initialization
+- **`test_calculator.py`**: Mathematical expression validation, error handling, tool integration tests
+- **`test_memory.py`**: Multi-turn conversation persistence, memory state tracking, context preservation
+- **`test_planner.py`**: Intent classification accuracy, action selection logic, decision confidence
+- **Features**: Unit tests, integration tests, security tests, error scenario coverage
+
+#### **6. Infrastructure & Deployment**
+- **`Dockerfile`**: Multi-stage container build, security optimization, production-ready image
+- **`deploy.sh`**: Google Cloud Run deployment script, environment configuration, CI/CD automation
+- **`cloudbuild.yaml`**: Google Cloud Build pipeline, automated testing, deployment triggers
+- **`requirements.txt`**: Python dependency management with version pinning
+- **`.gitignore`**: Git exclusion patterns for Python, data files, environment variables
+- **`.dockerignore`**: Docker build exclusion patterns for efficiency and security
+- **Features**: Container security, scalable deployment, automated CI/CD, dependency management
+
+#### **7. Documentation & Configuration**
+- **`README.md`**: Comprehensive documentation, setup instructions, architecture diagrams, API specs
+- **Features**: Submission checklist compliance, testing guides, technical explanations
 
 ### **Data Flow**
 
