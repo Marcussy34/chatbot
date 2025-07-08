@@ -637,10 +637,16 @@ chatbot/
 │   ├── memory_bot.py      # Conversation memory management (Part 1)
 │   ├── planner.py         # Intent classification and planning (Part 2)
 │   └── tools.py           # Tool integration and orchestration (Part 3)
+├── scripts/               # Data Ingestion Pipeline (Part 4)
+│   ├── scrape_products.py # ZUS Coffee product scraper
+│   ├── scrape_outlets.py  # ZUS Coffee outlet scraper
+│   ├── build_vector_index.py # FAISS vector index builder
+│   └── run_data_pipeline.py  # Master data pipeline orchestrator
 ├── data/                  # Data Layer (Part 4)
 │   ├── product_index.faiss # Vector embeddings for ZUS products
 │   ├── zus_outlets.db     # SQLite outlet database
-│   └── zus_products.json  # Product catalog from shop.zuscoffee.com
+│   ├── zus_products.json  # Product catalog from shop.zuscoffee.com
+│   └── zus_outlets.json   # Outlet data from zuscoffee.com
 ├── tests/                 # Comprehensive Test Suite (Part 5)
 │   ├── test_calculator.py # Calculator service and tool integration tests
 │   ├── test_memory.py     # Memory and conversation persistence tests
@@ -649,8 +655,9 @@ chatbot/
 ├── deploy.sh              # Google Cloud Run deployment script
 ├── cloudbuild.yaml        # CI/CD pipeline configuration
 ├── requirements.txt       # Python dependencies
-├── README.md              # This comprehensive documentation
-└── SUBMISSION.md          # Formal submission summary
+├── .gitignore             # Git ignore patterns
+├── .dockerignore          # Docker ignore patterns
+└── README.md              # This comprehensive documentation
 ```
 
 ---
