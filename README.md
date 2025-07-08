@@ -341,18 +341,115 @@ python -m pytest tests/test_calculator.py -v # Tool integration
 
 ## 🏗️ **Architecture Overview**
 
-### **System Architecture**
+### **Comprehensive System Architecture**
 
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   FastAPI       │    │   LangChain     │    │   Data Layer    │
-│   Web Server    │    │   Chatbot       │    │                 │
-├─────────────────┤    ├─────────────────┤    ├─────────────────┤
-│ • Calculator    │    │ • Memory Bot    │    │ • FAISS Vector  │
-│ • Products API  │◄──►│ • Planner Bot   │◄──►│ • SQLite DB     │
-│ • Outlets API   │    │ • Tool Manager  │    │ • Embeddings    │
-│ • Health Check  │    │ • Conversation  │    │ • Product Data  │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+The following diagram shows the complete system architecture with all components, data flows, and interactions:
+
+```mermaid
+graph TB
+    subgraph "🌐 Client Layer"
+        UI["🌐 Web Browser<br/>API Docs UI"]
+        API_CLIENT["📡 API Clients<br/>External Tools"]
+        TEST["🧪 Testing Tools<br/>Pytest/Manual"]
+    end
+    
+    subgraph "🚀 Application Layer"
+        subgraph "📊 FastAPI Web Server"
+            MAIN["main.py<br/>🔗 API Router"]
+            CALC_API["calculator.py<br/>🔢 Math Service"]
+            RAG_API["rag_service.py<br/>🔍 Product Search"]
+            SQL_API["sql_service.py<br/>🗃️ Outlet Queries"]
+        end
+        
+        subgraph "🤖 LangChain Chatbot Engine"
+            MEMORY["memory_bot.py<br/>💾 Conversation Memory"]
+            PLANNER["planner.py<br/>🧠 Intent & Planning"]
+            TOOLS["tools.py<br/>🔧 Tool Manager"]
+        end
+    end
+    
+    subgraph "🗄️ Data Pipeline Layer"
+        subgraph "📥 Data Ingestion Scripts"
+            SCRAPE_PROD["scrape_products.py<br/>☕ Product Scraper"]
+            SCRAPE_OUT["scrape_outlets.py<br/>📍 Outlet Scraper"]
+            BUILD_VEC["build_vector_index.py<br/>🔗 Vector Builder"]
+            PIPELINE["run_data_pipeline.py<br/>⚙️ Master Pipeline"]
+        end
+    end
+    
+    subgraph "💾 Data Storage Layer"
+        subgraph "🔍 Vector Store"
+            FAISS["product_index.faiss<br/>📊 FAISS Index"]
+            EMBEDDINGS["SentenceTransformers<br/>🧮 all-MiniLM-L6-v2"]
+        end
+        
+        subgraph "🗄️ Structured Data"
+            SQLITE["zus_outlets.db<br/>🗃️ SQLite Database"]
+            PRODUCTS_JSON["zus_products.json<br/>📄 Product Catalog"]
+            OUTLETS_JSON["zus_outlets.json<br/>📄 Outlet Data"]
+        end
+    end
+    
+    subgraph "🌍 External Data Sources"
+        ZUS_SHOP["shop.zuscoffee.com<br/>☕ Drinkware Products"]
+        ZUS_STORES["zuscoffee.com<br/>📍 Store Locations"]
+    end
+    
+    subgraph "🧪 Testing Layer"
+        TEST_CALC["test_calculator.py<br/>🔢 Math Tests"]
+        TEST_MEM["test_memory.py<br/>💾 Memory Tests"]
+        TEST_PLAN["test_planner.py<br/>🧠 Planning Tests"]
+    end
+    
+    %% Client connections
+    UI --> MAIN
+    API_CLIENT --> MAIN
+    TEST --> MAIN
+    
+    %% API routing
+    MAIN --> CALC_API
+    MAIN --> RAG_API
+    MAIN --> SQL_API
+    
+    %% Chatbot integration
+    PLANNER --> TOOLS
+    TOOLS --> CALC_API
+    TOOLS --> RAG_API
+    TOOLS --> SQL_API
+    MEMORY --> PLANNER
+    
+    %% Data pipeline flows
+    SCRAPE_PROD --> PRODUCTS_JSON
+    SCRAPE_OUT --> OUTLETS_JSON
+    SCRAPE_OUT --> SQLITE
+    PRODUCTS_JSON --> BUILD_VEC
+    BUILD_VEC --> FAISS
+    PIPELINE --> SCRAPE_PROD
+    PIPELINE --> SCRAPE_OUT
+    PIPELINE --> BUILD_VEC
+    
+    %% Data access
+    RAG_API --> FAISS
+    RAG_API --> EMBEDDINGS
+    SQL_API --> SQLITE
+    
+    %% External data sources
+    SCRAPE_PROD -.->|HTTP Scraping| ZUS_SHOP
+    SCRAPE_OUT -.->|HTTP Scraping| ZUS_STORES
+    
+    %% Testing connections
+    TEST_CALC --> CALC_API
+    TEST_MEM --> MEMORY
+    TEST_PLAN --> PLANNER
+    
+    %% Styling
+    style UI fill:#e1f5fe
+    style MAIN fill:#f3e5f5
+    style PLANNER fill:#fff3e0
+    style FAISS fill:#e8f5e8
+    style SQLITE fill:#fff8e1
+    style ZUS_SHOP fill:#ffebee
+    style ZUS_STORES fill:#ffebee
 ```
 
 ### **Conversation Flow Diagram**
