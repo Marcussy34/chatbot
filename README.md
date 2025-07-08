@@ -16,12 +16,12 @@ A production-ready conversational AI chatbot implementing all 5 parts of the Min
 **Live API Documentation**: https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/docs
 
 ### ✅ **README.md Requirements**
-- ✅ **Setup & Run Instructions**: [Complete setup guide](#setup--run-instructions) with local, Docker, and cloud deployment
-- ✅ **Architecture Overview**: [Comprehensive system architecture](#architecture-overview) with detailed component diagrams
-- ✅ **Key Trade-offs**: [Detailed analysis](#key-trade-offs) of framework choices, data storage, and deployment decisions
+- ✅ **Setup & Run Instructions**: [Complete setup guide](#️-setup--run-instructions) with local, Docker, and cloud deployment
+- ✅ **Architecture Overview**: [Comprehensive system architecture](#️-architecture-overview) with detailed component diagrams
+- ✅ **Key Trade-offs**: [Detailed analysis](#️-key-trade-offs) of framework choices, data storage, and deployment decisions
 
 ### ✅ **Documentation Requirements**
-- ✅ **API Specification**: [Complete API docs](#api-specification) including RAG & Text2SQL endpoints with examples
+- ✅ **API Specification**: [Complete API docs](#-api-specification) including RAG & Text2SQL endpoints with examples
 - ✅ **Flow Diagrams**: [Interactive conversation flow](#conversation-flow-diagram) and [system architecture](#comprehensive-system-architecture) diagrams
 - ✅ **Chatbot Setup**: [Testing instructions](#testing-parts-1--2-interactively) with example conversations and screenshots
 
