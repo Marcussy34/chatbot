@@ -6,9 +6,7 @@ FROM python:3.11-slim as builder
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    HF_HOME=/app/.cache/huggingface \
-    TRANSFORMERS_CACHE=/app/.cache/huggingface
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # Install system dependencies for building
 RUN apt-get update && apt-get install -y \
@@ -19,17 +17,12 @@ RUN apt-get update && apt-get install -y \
 
 # Create and set working directory
 WORKDIR /app
-RUN mkdir -p /app/.cache/huggingface
 
 # Copy requirements first for better caching
 COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy and run model preload script
-COPY preload_models.py .
-RUN python preload_models.py
 
 # Stage 2: Production image
 FROM python:3.11-slim as production
@@ -59,18 +52,12 @@ RUN mkdir -p /app/.cache/huggingface && \
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Copy pre-downloaded models from builder stage
-COPY --from=builder /app/.cache /app/.cache
-
 # Copy application code
 COPY --chown=appuser:appuser app/ ./app/
 COPY --chown=appuser:appuser chatbot/ ./chatbot/
 COPY --chown=appuser:appuser data/ ./data/
 COPY --chown=appuser:appuser scripts/ ./scripts/
-
-# Copy entry point script
 COPY --chown=appuser:appuser requirements.txt .
-# Startup handled directly with uvicorn
 
 # Switch to non-root user
 USER appuser

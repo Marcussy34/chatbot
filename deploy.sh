@@ -6,7 +6,7 @@
 set -e  # Exit on any error
 
 # Configuration
-PROJECT_ID="your-google-cloud-project-id"
+PROJECT_ID="your-google-cloud-projecet-id"
 SERVICE_NAME="mindhive-chatbot"
 REGION="us-central1"
 IMAGE_NAME="gcr.io/$PROJECT_ID/$SERVICE_NAME"

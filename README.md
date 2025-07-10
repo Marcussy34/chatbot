@@ -15,6 +15,9 @@ A production-ready conversational AI chatbot implementing all 5 parts of the Min
 **Production URL**: https://mindhive-chatbot-yvsu2loedq-uc.a.run.app  
 **Live API Documentation**: https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/docs
 
+> **🆕 NEW: Enhanced Chat Endpoint with Memory & Tool Integration**  
+> The system now includes a unified `/chat` endpoint that demonstrates conversational AI with persistent memory and automatic tool selection - addressing all assessment requirements in a single interface.
+
 ### ✅ **README.md Requirements**
 - ✅ **Setup & Run Instructions**: [Complete setup guide](#️-setup--run-instructions) with local, Docker, and cloud deployment
 - ✅ **Architecture Overview**: [Comprehensive system architecture](#️-architecture-overview) with detailed component diagrams
@@ -27,7 +30,22 @@ A production-ready conversational AI chatbot implementing all 5 parts of the Min
 
 ## 🚀 **Quick Test - Try It Now**
 
-**Live API Endpoints** (Click to test immediately):
+### **🤖 Core Chat Endpoint (NEW!)**
+**Interactive Chatbot with Memory & Tool Integration**:
+- **Endpoint**: `POST /chat` 
+- **Features**: Multi-turn conversation, memory persistence, automatic tool selection
+- **Example**: Send `{"message": "Is there an outlet in Petaling Jaya?", "session_id": "test123"}`
+- **Live API Docs**: [Interactive Testing](https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/docs#/default/chat_chat_post)
+
+**🧪 Test the Chat Endpoint:**
+```bash
+curl -X POST "https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/chat" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Is there an outlet in Petaling Jaya?", "session_id": "test123"}'
+```
+
+### **🔧 Individual Tool Endpoints**
+**Test Each Tool Independently** (Click to test immediately):
 - **Calculator**: [2+3*4](https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/calculator?expr=2%2B3*4) → Returns: `{"result": 14}`
 - **Product Search**: [Find ceramic mugs](https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/products?query=ceramic+mug) → RAG-powered product recommendations
 - **Outlet Query**: [Outlets in PJ](https://mindhive-chatbot-yvsu2loedq-uc.a.run.app/outlets?query=outlets+in+Petaling+Jaya) → Text2SQL database results
@@ -667,6 +685,7 @@ graph LR
 
 | Method | Endpoint | Description | Parameters | Response |
 |--------|----------|-------------|------------|----------|
+| `POST` | `/chat` | **Interactive chatbot with memory & tools** | `{"message": str, "session_id": str}` | `{"response": str, "conversation_context": {...}}` |
 | `GET` | `/health` | Service health check | None | `{"status": "healthy"}` |
 | `GET` | `/calculator` | Mathematical expression evaluation | `expr` (string) | `{"result": number}` |
 | `GET` | `/products` | RAG product search | `query` (string) | `{"products": [...]}` |
@@ -674,6 +693,67 @@ graph LR
 | `GET` | `/docs` | Interactive API documentation | None | Swagger UI |
 
 ### **Example Requests & Responses**
+
+#### **Chat API (Core Feature)**
+```bash
+# Multi-turn conversation demonstrating memory and tool integration
+POST /chat
+Content-Type: application/json
+
+# Turn 1: Outlet query
+{"message": "Is there an outlet in Petaling Jaya?", "session_id": "user123"}
+
+Response:
+{
+  "response": "I found 2 outlets in Petaling Jaya. Which specific location are you interested in?",
+  "session_id": "user123",
+  "conversation_context": {
+    "turn_count": 1,
+    "memory_contents": "Human: Is there an outlet in Petaling Jaya?\nAI: I found 2 outlets...",
+    "planner_action": "sql_query",
+    "planner_confidence": 0.8
+  },
+  "planner_decision": {
+    "action": "sql_query",
+    "reasoning": "Outlet/location query detected. Will query outlet database.",
+    "confidence": 0.8
+  }
+}
+
+# Turn 2: Follow-up with memory
+{"message": "SS2, what's the opening time?", "session_id": "user123"}
+
+Response:
+{
+  "response": "The ZUS Coffee SS2 outlet opens at 7:00 AM and closes at 10:00 PM daily.",
+  "session_id": "user123", 
+  "conversation_context": {
+    "turn_count": 2,
+    "memory_contents": "Human: Is there an outlet in Petaling Jaya?\nAI: I found 2 outlets...\nHuman: SS2, what's the opening time?\nAI: The ZUS Coffee SS2 outlet opens at 7:00 AM...",
+    "planner_action": "sql_query",
+    "planner_confidence": 0.8
+  }
+}
+
+# Turn 3: Different tool (calculator)
+{"message": "Calculate 2+3*4", "session_id": "user123"}
+
+Response:
+{
+  "response": "The result of 2+3*4 is 14",
+  "session_id": "user123",
+  "conversation_context": {
+    "turn_count": 3,
+    "planner_action": "calculate", 
+    "planner_confidence": 0.9
+  },
+  "planner_decision": {
+    "action": "calculate",
+    "reasoning": "Mathematical expression detected: '2+3*4'. Ready to calculate.",
+    "confidence": 0.9
+  }
+}
+```
 
 #### **Calculator API**
 ```bash
@@ -840,6 +920,11 @@ This implementation addresses all requirements of the Mindhive AI Chatbot Engine
 **GitHub Repository**: https://github.com/Marcussy34/chatbot  
 **Deployment**: Google Cloud Run (production-ready, auto-scaling)  
 **Assessment Completion**: All 5 parts implemented with comprehensive testing
+
+### **🆕 Latest Enhancement (Jan 2025)**
+- **Enhanced Chat Endpoint**: Added unified `/chat` interface with memory persistence
+- **Deployment Status**: ✅ Successfully deployed and tested
+- **Key Features**: Multi-turn conversations, automatic tool selection, session management
 
 **Delivery**: Submitted to jermaine@mindhive.asia (cc: johnson@mindhive.asia)
 

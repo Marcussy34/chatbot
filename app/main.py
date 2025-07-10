@@ -5,6 +5,7 @@ FastAPI Main Application - Mindhive AI Chatbot Assessment
 Main FastAPI application serving calculator and future API endpoints.
 
 Endpoints:
+- /chat: Interactive chatbot with memory and tool integration (Core Feature)
 - /calculator: Mathematical expression evaluation (Phase 3)
 - /products: RAG product search (Phase 4)
 - /outlets: Text2SQL outlet queries (Phase 4)
@@ -13,13 +14,21 @@ Endpoints:
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 import uvicorn
-from typing import Optional
+from typing import Optional, Dict, Any
 import logging
+import sys
+from pathlib import Path
+
+# Add chatbot to path
+sys.path.append(str(Path(__file__).parent.parent))
 
 from .calculator import CalculatorService
 from .rag_service import create_rag_service
 from .sql_service import create_sql_service
+from chatbot.planner import PlannerBot
+from chatbot.memory_bot import MemoryBot
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -28,7 +37,7 @@ logger = logging.getLogger(__name__)
 # Create FastAPI application
 app = FastAPI(
     title="Mindhive AI Chatbot API",
-    description="API endpoints for calculator, product search, and outlet queries",
+    description="API endpoints for calculator, product search, outlet queries, and interactive chat",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
@@ -48,6 +57,28 @@ calculator_service = CalculatorService()
 rag_service = create_rag_service()
 sql_service = create_sql_service()
 
+# Initialize chatbot with tool integration
+planner_bot = PlannerBot(enable_tools=True)
+memory_bot = MemoryBot()
+
+# In-memory conversation storage (for demo purposes)
+# In production, use persistent storage like Redis
+conversations: Dict[str, Dict[str, Any]] = {}
+
+
+class ChatMessage(BaseModel):
+    """Chat message request model."""
+    message: str
+    session_id: Optional[str] = "default"
+
+
+class ChatResponse(BaseModel):
+    """Chat response model."""
+    response: str
+    session_id: str
+    conversation_context: Dict[str, Any]
+    planner_decision: Optional[Dict[str, Any]] = None
+
 
 @app.get("/")
 async def root():
@@ -58,6 +89,7 @@ async def root():
         "message": "Mindhive AI Chatbot API",
         "version": "1.0.0",
         "endpoints": {
+            "chat": "/chat (POST) - Interactive chatbot with memory and tools",
             "calculator": "/calculator?expr=<expression>",
             "products": "/products?query=<query>",
             "outlets": "/outlets?query=<query>"
@@ -74,13 +106,137 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "chatbot-api",
-        "phase": "4-rag-sql",
+        "phase": "complete-chatbot",
         "services": {
             "calculator": "available",
             "rag": "available" if rag_service else "unavailable",
-            "sql": "available" if sql_service else "unavailable"
+            "sql": "available" if sql_service else "unavailable",
+            "chatbot": "available",
+            "memory": "available",
+            "planner": "available"
         }
     }
+
+
+@app.post("/chat")
+async def chat(chat_request: ChatMessage) -> ChatResponse:
+    """
+    Interactive chatbot endpoint with memory and tool integration.
+    
+    This endpoint demonstrates the core chatbot functionality including:
+    - Conversation memory across multiple turns
+    - Intent classification and action planning
+    - Tool integration (calculator, product search, outlet queries)
+    - Context-aware responses
+    
+    Args:
+        chat_request: Chat message with optional session ID
+        
+    Returns:
+        ChatResponse with bot response and conversation context
+        
+    Examples:
+        POST /chat
+        {"message": "Is there an outlet in Petaling Jaya?", "session_id": "user123"}
+        
+        POST /chat  
+        {"message": "SS2, what's the opening time?", "session_id": "user123"}
+        
+        POST /chat
+        {"message": "Calculate 2+3*4", "session_id": "user123"}
+    """
+    try:
+        session_id = chat_request.session_id or "default"
+        user_message = chat_request.message.strip()
+        
+        logger.info(f"Chat request: session={session_id}, message='{user_message}'")
+        
+        # Initialize session if new
+        if session_id not in conversations:
+            conversations[session_id] = {
+                "planner": PlannerBot(enable_tools=True),
+                "memory": MemoryBot(),
+                "turn_count": 0
+            }
+        
+        session = conversations[session_id]
+        session["turn_count"] += 1
+        
+        # Get planner decision
+        planner_result = session["planner"].execute_conversation_turn(user_message)
+        
+        # Update memory with the interaction
+        memory_response = session["memory"].chat(user_message)
+        
+        # Prepare response
+        bot_response = planner_result.get("response", "I'm not sure how to help with that.")
+        
+        # Get conversation context
+        conversation_context = {
+            "turn_count": session["turn_count"],
+            "memory_contents": session["memory"].get_memory_contents(),
+            "planner_action": planner_result.get("decision", {}).action.value if planner_result.get("decision") else None,
+            "planner_confidence": planner_result.get("decision", {}).confidence if planner_result.get("decision") else None
+        }
+        
+        logger.info(f"Chat response: session={session_id}, action={conversation_context.get('planner_action')}")
+        
+        return ChatResponse(
+            response=bot_response,
+            session_id=session_id,
+            conversation_context=conversation_context,
+            planner_decision={
+                "action": conversation_context.get('planner_action'),
+                "reasoning": planner_result.get("decision", {}).reasoning if planner_result.get("decision") else None,
+                "confidence": conversation_context.get('planner_confidence')
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Chat error: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error processing chat message: {str(e)}"
+        )
+
+
+@app.get("/chat/sessions")
+async def get_active_sessions():
+    """
+    Get information about active chat sessions.
+    
+    Returns:
+        Dictionary with active session information
+    """
+    return {
+        "active_sessions": list(conversations.keys()),
+        "total_sessions": len(conversations),
+        "sessions_info": {
+            session_id: {
+                "turn_count": session["turn_count"],
+                "memory_length": len(session["memory"].get_memory_contents()),
+            }
+            for session_id, session in conversations.items()
+        }
+    }
+
+
+@app.delete("/chat/sessions/{session_id}")
+async def clear_session(session_id: str):
+    """
+    Clear a specific chat session.
+    
+    Args:
+        session_id: Session ID to clear
+        
+    Returns:
+        Confirmation message
+    """
+    if session_id in conversations:
+        del conversations[session_id]
+        return {"message": f"Session {session_id} cleared successfully"}
+    else:
+        raise HTTPException(status_code=404, detail=f"Session {session_id} not found")
 
 
 @app.get("/calculator")
@@ -99,7 +255,6 @@ async def calculate(
     Examples:
         - /calculator?expr=2+3 → {"result": 5}
         - /calculator?expr=10*5 → {"result": 50}
-        - /calculator?expr=15/3 → {"result": 5.0}
         - /calculator?expr=10/0 → {"error": "Division by zero"}
     """
     try:
@@ -109,7 +264,11 @@ async def calculate(
         result = calculator_service.evaluate_expression(expr)
         
         logger.info(f"Calculator result: {result}")
-        return {"result": result}
+        return {
+            "expression": expr,
+            "result": result,
+            "safe": True
+        }
         
     except ValueError as e:
         logger.warning(f"Calculator validation error: {e}")
@@ -147,7 +306,7 @@ async def search_products(
     Examples:
         - /products?query=black tumbler
         - /products?query=ceramic mug for office
-        - /products?query=travel bottle with insulation
+        - /products?query=travel bottle
     """
     try:
         logger.info(f"Product search request: query='{query}'")
@@ -197,9 +356,10 @@ async def query_outlets(
         # Return both formatted and raw data
         response = {
             "query": query,
-            "formatted_response": formatted_response,
-            "raw_data": result,
-            "total_results": result.get('total_results', 0)
+            "sql_generated": result.get('sql_query', ''),
+            "outlets": result.get('results', []),
+            "total_results": result.get('total_results', 0),
+            "formatted_response": formatted_response
         }
         
         logger.info(f"Outlet query result: {result.get('total_results', 0)} outlets found")
